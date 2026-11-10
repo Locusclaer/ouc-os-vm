@@ -452,7 +452,41 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
 uint64
 vmfault(pagetable_t pagetable, uint64 va, int read)
 {
-  return 0;
+  struct proc *p = myproc();
+
+  // Both load and store faults allocate a read/write heap page.
+  // Existing mappings and protection faults must not be changed.
+  (void)read;
+
+  if(p == 0 || pagetable != p->pagetable)
+    return 0;
+
+  // Validate the original address before rounding it down.
+  if(va >= p->sz || va >= MAXVA)
+    return 0;
+
+  uint64 va0 = PGROUNDDOWN(va);
+
+  pte_t *pte = walk(pagetable, va0, 0);
+
+  // A valid mapping may have failed because of permissions.
+  // Do not replace it or grant additional permissions.
+  if(pte != 0 && (*pte & PTE_V))
+    return 0;
+
+  char *mem = kalloc();
+  if(mem == 0)
+    return 0;
+
+  memset(mem, 0, PGSIZE);
+
+  if(mappages(pagetable, va0, PGSIZE,
+              (uint64)mem, PTE_R | PTE_W | PTE_U) < 0){
+    kfree(mem);
+    return 0;
+  }
+
+  return (uint64)mem;
 }
 
 int

@@ -39,14 +39,35 @@ sys_wait(void)
 uint64
 sys_sbrk(void)
 {
-  uint64 addr;
-  int n;
+  int n, mode;
+  struct proc *p = myproc();
 
   argint(0, &n);
-  addr = myproc()->sz;
+  argint(1, &mode);
 
-  if(growproc(n) < 0)
+  if(mode != SBRK_EAGER && mode != SBRK_LAZY)
     return -1;
+
+  uint64 addr = p->sz;
+
+  // Keep the heap below the reserved high-address mappings.
+  // Check before addition to avoid overflow.
+  if(n > 0 &&
+     (addr >= USYSCALL || (uint64)n >= USYSCALL - addr))
+    return -1;
+
+  // Reject shrinking below address zero.
+  if(n < 0 && (uint64)(-(long)n) > addr)
+    return -1;
+
+  if(n <= 0 || mode == SBRK_EAGER){
+    // Querying, shrinking, or eager allocation.
+    if(growproc(n) < 0)
+      return -1;
+  } else {
+    // Lazy growth: reserve virtual space without allocating pages.
+    p->sz = addr + (uint64)n;
+  }
 
   return addr;
 }

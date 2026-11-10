@@ -146,6 +146,7 @@ UPROGS=\
 	$U/_usyscalltest\
 	$U/_usyscallro\
 	$U/_uvmlookup\
+	$U/_lazycheck\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
