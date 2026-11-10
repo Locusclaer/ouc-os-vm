@@ -110,9 +110,38 @@ sys_vmprint(void)
 }
 
 // TODO: print pte\pa pages\offset\PA for the given virtual address.
+// Print the mapping of a virtual address in the current process.
 uint64
 sys_vmlookup(void)
 {
-    //struct proc *p = myproc(); 
-    return 0;
+  uint64 va;
+  argaddr(0, &va);
+
+  struct proc *p = myproc();
+
+  // walk() panics for addresses outside its supported range.
+  if(va >= MAXVA){
+    printf("VA %p: out of range\n", (void *)va);
+    return -1;
+  }
+
+  // Query only: do not allocate missing page tables.
+  pte_t *pte = walk(p->pagetable, va, 0);
+
+  if(pte == 0 || (*pte & PTE_V) == 0){
+    printf("VA %p: not mapped\n", (void *)va);
+    return -1;
+  }
+
+  uint64 pa_page = PTE2PA(*pte);
+  uint64 offset = va & (PGSIZE - 1);
+  uint64 pa = pa_page + offset;
+
+  printf("VA           : %p\n", (void *)va);
+  printf("PTE          : %p\n", (void *)*pte);
+  printf("PA page      : %p\n", (void *)pa_page);
+  printf("offset       : %p\n", (void *)offset);
+  printf("PA           : %p\n", (void *)pa);
+
+  return 0;
 }

@@ -163,7 +163,6 @@ sbrklazy(int n) {
 int
 ugetpid(void)
 {
-  //TODO:return the pid of the current process using the USYSCALL page
-  
-  return 0;
+  struct usyscall *u = (struct usyscall *)USYSCALL;
+  return u->pid;
 }

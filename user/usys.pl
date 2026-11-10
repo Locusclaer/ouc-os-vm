@@ -43,4 +43,5 @@ entry("sbrk");
 entry("pause");
 entry("uptime");
 entry("vmprint");
+entry("vmlookup");
 # you found me, well done

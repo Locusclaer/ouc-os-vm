@@ -144,6 +144,8 @@ UPROGS=\
 	$U/_dorphan\
 	$U/_vmobserve\
 	$U/_usyscalltest\
+	$U/_usyscallro\
+	$U/_uvmlookup\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

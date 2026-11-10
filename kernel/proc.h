@@ -107,4 +107,5 @@ struct proc {
 
   // TODO: add a field to support ugetpid()
   // it can save pid in kernel space, and then copy it to user space when ugetpid() is called.
+  struct usyscall *usyscall;   // Per-process shared PID page
 };

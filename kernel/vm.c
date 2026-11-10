@@ -469,35 +469,40 @@ ismapped(pagetable_t pagetable, uint64 va)
 }
 
 // TODO: Print the page table.
+// Recursively print valid page table entries.
+// level 0, 1, 2 correspond to VPN[2], VPN[1], VPN[0].
 static void
-vmprint_walk(pagetable_t pagetable,int level)
+vmprint_walk(pagetable_t pagetable, int level)
 {
   for(int i = 0; i < 512; i++){
     pte_t pte = pagetable[i];
-    
-    // Skip invalid page table entries.
+
+    // Ignore invalid entries.
     if((pte & PTE_V) == 0)
       continue;
-    // TODO:
-    // Print indentation according to the current level.
 
-    // TODO:
-    // Print the PTE index, PTE value and physical address.
+    uint64 pa = PTE2PA(pte);
 
-    // TODO:
-    // Determine whether this PTE points to a lower-level
-    // page table or represents a leaf mapping.
+    // Root entries use ".."; each deeper level adds " ..".
+    for(int j = 0; j <= level; j++){
+      printf("..");
+      if(j < level)
+        printf(" ");
+    }
 
-    // TODO:
-    // If this PTE points to a lower-level page table,
-    // recursively print that page table.
+    printf("%d: Pte %p PA %p\n",
+           i, (void *)pte, (void *)pa);
+
+    // A valid entry without R/W/X points to a lower-level table.
+    if((pte & (PTE_R | PTE_W | PTE_X)) == 0)
+      vmprint_walk((pagetable_t)pa, level + 1);
   }
 }
 
 void
 vmprint(pagetable_t pagetable)
 {
-  printf("===OUC===c1: Print Page table ===\n");
-  printf("\nTODO: <vm.c> Printing the Page table %p\n", pagetable);
+  printf("===OUC===c1: Page table ===\n");
+  printf("Printing the Page table %p\n", pagetable);
   vmprint_walk(pagetable, 0);
 }

@@ -27,6 +27,7 @@ char* sys_sbrk(int,int);
 int pause(int);
 int uptime(void);
 int vmprint(void);
+int vmlookup(uint64);
 // congratulations! welcome to 2.3
 
 // ulib.c
